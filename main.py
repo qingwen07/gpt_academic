@@ -397,7 +397,6 @@ def main():
 
     def my_auth(username, password):
         res = False
-        print('username=%s,password=%s' % (username, password))
         headers = {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
         }
@@ -405,7 +404,6 @@ def main():
             response = requests.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
                     headers=headers, data="username=%s&password=%s" % (username, password), 
                     timeout=TIMEOUT_SECONDS);
-            print(response.text)
             resp_json = response.json()
             if resp_json['code'] == 200:
                 res = True
