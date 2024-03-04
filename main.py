@@ -404,6 +404,7 @@ def main():
             response = requests.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
                     headers=headers, data="username=%s&password=%s" % (username, password), 
                     timeout=TIMEOUT_SECONDS);
+            print(response)
             try:
                 resp_json = json.loads(response)
                 if resp_json['code'] == 200:
