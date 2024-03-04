@@ -397,8 +397,9 @@ def main():
 
     def my_auth(username, password):
         res = False
+        print('username=%s,password=%s' % (username, password))
         headers = {
-            "Content-Type": "pplication/x-www-form-urlencoded; charset=UTF-8"
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
         }
         try:
             response = requests.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
