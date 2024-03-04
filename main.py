@@ -1,10 +1,13 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import requests
+import json
+
+from toolbox import get_conf
+TIMEOUT_SECONDS = \
+    get_conf('TIMEOUT_SECONDS')
 
 help_menu_description = \
-"""Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic),
-感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors).
-</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki),
-如遇到Bug请前往[Bug反馈](https://github.com/binary-husky/gpt_academic/issues).
+"""有任何问题，请联系QQ：839226604
 </br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交
 </br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮
 </br></br>函数插件区使用说明: 1. 输入路径/问题, 或者上传文件; 2. 点击任意函数插件区按钮
@@ -392,6 +395,26 @@ def main():
         threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
         threading.Thread(target=warm_up_mods, name="warm-up", daemon=True).start()      # 预热tiktoken模块
 
+    def my_auth(username, password):
+        res = False
+        headers = {
+            "Content-Type": "pplication/x-www-form-urlencoded; charset=UTF-8"
+        }
+        try:
+            response = requests.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
+                    headers=headers, data="username=%s&password=%s" % (username, password), 
+                    timeout=TIMEOUT_SECONDS);
+            try:
+                resp_json = json.loads(response)
+                if resp_json['code'] == 200:
+                    res = True
+            except:
+                pass
+        except requests.exceptions.ReadTimeout as e:
+            print(f'my_auth timeout, username:%s' % username)
+        
+        return res
+
     run_delayed_tasks()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         quiet=True,
@@ -401,7 +424,8 @@ def main():
         ssl_verify=False,
         server_port=PORT,
         favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"),
-        auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
+        # auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
+        auth=my_auth,
         blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
     # 如果需要在二级路径下运行
