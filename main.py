@@ -35,7 +35,7 @@ def main():
     from themes.theme import adjust_theme, advanced_css, theme_declaration, js_code_clear, js_code_reset, js_code_show_or_hide, js_code_show_or_hide_group2
     from themes.theme import js_code_for_css_changing, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
-    title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
+    title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}账号注册：<a href='http://mall.gpt-hub.top' target='_blank'>http://mall.gpt-hub.top</a>"
 
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
@@ -77,8 +77,7 @@ def main():
     cancel_handles = []
     customize_btns = {}
     predefined_btns = {}
-    # advanced_css
-    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=".gradio-footer {display: none !important;}") as demo:
+    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
         secret_css, dark_mode, py_pickle_cookie = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False), gr.Textbox(visible=False)
         cookies = gr.State(load_chat_cookies())
