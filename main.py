@@ -16,6 +16,9 @@ help_menu_description = \
 </br></br>如何语音对话: 请阅读Wiki
 </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
+# GPTHUB与商店通信用的session
+mall_session = requests.session()
+
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.32.8']:
@@ -36,6 +39,7 @@ def main():
     from themes.theme import js_code_for_css_changing, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}<h3 align=\"center\">账号注册：<a href='http://mall.gpt-hub.top' target='_blank'>http://mall.gpt-hub.top</a></h3>"
+    title_html_template = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}<h3 align=\"center\">[账号：username][服务有效期：done_date][剩余算子：suanzi_count][账号注册：<a href='http://mall.gpt-hub.top' target='_blank'>http://mall.gpt-hub.top</a>]</h3>"
 
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
@@ -78,7 +82,28 @@ def main():
     customize_btns = {}
     predefined_btns = {}
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
-        gr.HTML(title_html)
+        gr_title_html = gr.HTML(title_html)
+
+        # 创建一个函数，用于更新HTML文本
+        def update_title_html():
+            # 从后台获取数据
+            try:
+                response = mall_session.get("http://mall.gpt-hub.top/user/api/gpthub/userinfo", timeout=TIMEOUT_SECONDS)
+                res_json = response.json()
+                if res_json['code'] == 200:
+                    user_info = res_json['data']
+                    
+                    new_data = title_html_template.replace('username', user_info['username'])
+                    new_data = new_data.replace('done_date', user_info['gpt_done_date'])
+                    new_data = new_data.replace('suanzi_count', user_info['gpt_suanzi_count'])
+                    # 更新HTML组件的值
+                    gr_title_html.set_value(new_data)
+            except:
+                pass
+        
+        # 监听HTML组件的变化事件
+        gr_title_html.change(update_title_html)
+
         secret_css, dark_mode, py_pickle_cookie = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False), gr.Textbox(visible=False)
         cookies = gr.State(load_chat_cookies())
         with gr_L1():
@@ -401,7 +426,7 @@ def main():
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
         }
         try:
-            response = requests.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
+            response = mall_session.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
                     headers=headers, data="username=%s&password=%s" % (username, password), 
                     timeout=TIMEOUT_SECONDS);
             resp_json = response.json()
