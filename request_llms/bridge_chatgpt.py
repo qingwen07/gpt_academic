@@ -82,13 +82,19 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     observe_window = None：
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
+    from .bridge_all import model_info
+    
     watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
     headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
+    # todo: 这里可以加入计算请求的Tokens的代码
+    fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
+    req_token_cnt = fn_token_cnt(json.dumps(payload))
+    print(f"[predict_no_ui_long_connection]消耗请求tokens: {req_token_cnt}")
+
     retry = 0
     while True:
         try:
             # make a POST request to the API endpoint, stream=False
-            from .bridge_all import model_info
             endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
@@ -142,6 +148,11 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         raise RuntimeError("由于提问含不合规内容被Azure过滤。")
     if json_data and json_data['finish_reason'] == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
+    
+    # todo: 这里可以增加计算response的Tokens数量的代码，这里是所有的响应
+    if len(result) > 0:
+        resp_token_cnt = fn_token_cnt(result)
+        print(f"[predict_no_ui_long_connection]返回消耗tokens: {resp_token_cnt}")
     return result
 
 
@@ -198,6 +209,11 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
         return
     
+    # todo: 这里可以加入计算请求的Tokens的代码
+    fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
+    req_token_cnt = fn_token_cnt(json.dumps(payload))
+    print(f"消耗请求tokens: {req_token_cnt}")
+
     history.append(inputs); history.append("")
 
     retry = 0
@@ -279,6 +295,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
                     print(error_msg)
                     return
+                
+    # todo: 这里可以增加计算response的Tokens数量的代码，这里是所有的响应
+    if len(gpt_replying_buffer) > 0:
+        resp_token_cnt = fn_token_cnt(gpt_replying_buffer)
+        print(f"返回消耗tokens: {resp_token_cnt}")
+
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
     from .bridge_all import model_info

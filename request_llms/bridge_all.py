@@ -11,7 +11,8 @@
 import tiktoken, copy
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask
+from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask, update_ui
+from check_proxy import get_user_isvalid
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
@@ -704,6 +705,10 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
     """
     import threading, time, copy
 
+    # 判断用户是否还在有效期
+    if not get_user_isvalid():
+        raise AssertionError("账号服务期已过或算子为零，请前往 http://mall.gpt-hub.top 查看！")
+
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
     model = llm_kwargs['llm_model']
     n_model = 1
@@ -777,6 +782,10 @@ def predict(inputs, llm_kwargs, *args, **kwargs):
     chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
+
+    if not get_user_isvalid():
+        yield from update_ui(chatbot=args[1], history=[], msg="账号服务期已过或算子为零，请前往 http://mall.gpt-hub.top 查看！") # 刷新界面
+        return
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
     method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项

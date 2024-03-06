@@ -167,6 +167,26 @@ def warm_up_vectordb():
         import nltk
         with ProxyNetworkActivate("Warmup_Modules"): nltk.download("punkt")
 
+# 检查当前用户是否还在有效期及算子是否足够
+def get_user_isvalid():
+    import mall
+
+    res = True
+    try:
+        response = mall.mall_session.get("http://mall.gpt-hub.top/user/api/gpthub/userinfo")
+        res_json = response.json()
+        if res_json['code'] == 200:
+            user_info = res_json['data']
+            from datetime import datetime
+            current_time = datetime.now()
+            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            suanzi_count = int(user_info['gpt_suanzi_count'])
+            if user_info['gpt_done_date'] < formatted_time or suanzi_count <= 0:
+                res = False
+
+    except Exception as e:
+        print(f"get_user_isvalid 出错了：{e}")
+    return res
         
 if __name__ == '__main__':
     import os

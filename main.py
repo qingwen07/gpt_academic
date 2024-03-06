@@ -1,6 +1,7 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import requests
 import json
+import mall
 
 from toolbox import get_conf
 TIMEOUT_SECONDS = \
@@ -16,8 +17,6 @@ help_menu_description = \
 </br></br>如何语音对话: 请阅读Wiki
 </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
-# GPTHUB与商店通信用的session
-mall_session = requests.session()
 
 def main():
     import gradio as gr
@@ -425,7 +424,7 @@ def main():
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
         }
         try:
-            response = mall_session.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
+            response = mall.mall_session.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
                     headers=headers, data="username=%s&password=%s" % (username, password), 
                     timeout=TIMEOUT_SECONDS);
             resp_json = response.json()
