@@ -1,3 +1,4 @@
+import mall
 
 def check_proxy(proxies):
     import requests
@@ -169,11 +170,9 @@ def warm_up_vectordb():
 
 # 检查当前用户是否还在有效期及算子是否足够
 def get_user_isvalid():
-    import mall
-
     res = True
     try:
-        response = mall.mall_session.get("http://mall.gpt-hub.top/user/api/gpthub/userinfo")
+        response = mall.mall_session.get(f"{mall.mall_host}/user/api/gpthub/userinfo")
         res_json = response.json()
         if res_json['code'] == 200:
             user_info = res_json['data']
@@ -186,6 +185,22 @@ def get_user_isvalid():
 
     except Exception as e:
         print(f"get_user_isvalid 出错了：{e}")
+    return res
+
+def dec_suanzi_count(model, token_cnt):
+    res = False
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+    }
+    try:
+        response = mall.mall_session.post(f"{mall.mall_host}/user/api/gpthub/decSuanziCount", 
+                headers=headers, data="model=%s&token_cnt=%s" % (model, token_cnt));
+        resp_json = response.json()
+        if resp_json['code'] == 200:
+            res = True
+    except Exception as e:
+        print(f'dec_suanzi_count exception: {e}')
+        
     return res
         
 if __name__ == '__main__':

@@ -24,6 +24,7 @@ import random
 from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
     get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
+from check_proxy import dec_suanzi_count
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
@@ -83,13 +84,15 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
     from .bridge_all import model_info
-    
+
     watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
     headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
     # todo: 这里可以加入计算请求的Tokens的代码
     fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
     req_token_cnt = fn_token_cnt(json.dumps(payload))
     print(f"[predict_no_ui_long_connection]消耗请求tokens: {req_token_cnt}")
+    # 减少AI算子数量
+    dec_suanzi_count(llm_kwargs['llm_model'], req_token_cnt)
 
     retry = 0
     while True:
@@ -153,6 +156,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if len(result) > 0:
         resp_token_cnt = fn_token_cnt(result)
         print(f"[predict_no_ui_long_connection]返回消耗tokens: {resp_token_cnt}")
+        # 减少AI算子数量
+        dec_suanzi_count(llm_kwargs['llm_model'], resp_token_cnt)
     return result
 
 
@@ -213,6 +218,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
     req_token_cnt = fn_token_cnt(json.dumps(payload))
     print(f"消耗请求tokens: {req_token_cnt}")
+    # 减少AI算子数量
+    dec_suanzi_count(llm_kwargs['llm_model'], req_token_cnt)
 
     history.append(inputs); history.append("")
 
@@ -300,6 +307,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     if len(gpt_replying_buffer) > 0:
         resp_token_cnt = fn_token_cnt(gpt_replying_buffer)
         print(f"返回消耗tokens: {resp_token_cnt}")
+        # 减少AI算子数量
+        dec_suanzi_count(llm_kwargs['llm_model'], resp_token_cnt)
 
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):

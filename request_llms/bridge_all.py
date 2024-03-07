@@ -194,7 +194,7 @@ model_info = {
         "fn_with_ui": chatgpt_vision_ui,
         "fn_without_ui": chatgpt_vision_noui,
         "endpoint": openai_endpoint,
-        "max_token": 4096,
+        "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
@@ -313,7 +313,7 @@ for model in AVAIL_LLM_MODELS:
         model_info.update({model: mi})
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
-if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
+if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS or "claude-3" in AVAIL_LLM_MODELS:
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
     from .bridge_claude import predict as claude_ui
     model_info.update({
@@ -328,6 +328,16 @@ if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     })
     model_info.update({
         "claude-2": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": None,
+            "max_token": 8196,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+    model_info.update({
+        "claude-3": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
             "endpoint": None,

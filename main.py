@@ -424,7 +424,7 @@ def main():
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
         }
         try:
-            response = mall.mall_session.post("http://mall.gpt-hub.top/user/api/authentication/login4gpthub", 
+            response = mall.mall_session.post(f"{mall.mall_host}/user/api/authentication/login4gpthub", 
                     headers=headers, data="username=%s&password=%s" % (username, password), 
                     timeout=TIMEOUT_SECONDS);
             resp_json = response.json()
