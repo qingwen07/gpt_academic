@@ -337,7 +337,7 @@ if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS or "cla
         },
     })
     model_info.update({
-        "claude-3": {
+        "claude-3-opus-20240229": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
             "endpoint": None,
