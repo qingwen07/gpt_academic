@@ -61,6 +61,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if len(ANTHROPIC_API_KEY) == 0:
         raise RuntimeError("没有设置ANTHROPIC_API_KEY选项")
 
+    resp_stream = None
     while True:
         try:
             # make a POST request to the API endpoint, stream=False
@@ -68,9 +69,10 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
             # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             # with ProxyNetworkActivate()
-            stream = anthropic.completions.create(
-                prompt=prompt,
-                max_tokens_to_sample=4096,       # The maximum number of tokens to generate before stopping.
+            resp_stream = anthropic.messages.create(
+                system=sys_prompt,
+                messages=prompt,
+                max_tokens=1024,       # The maximum number of tokens to generate before stopping.
                 model=llm_kwargs['llm_model'],
                 stream=True,
                 temperature = llm_kwargs['temperature']
@@ -83,12 +85,12 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
     result = ''
     try: 
-        for completion in stream:
-            result += completion.completion
-            if not console_slience: print(completion.completion, end='')
+        for completion in resp_stream.text_stream:
+            result += completion
+            if not console_slience: print(completion, end='')
             if observe_window is not None: 
                 # 观测窗，把已经获取的数据显示出去
-                if len(observe_window) >= 1: observe_window[0] += completion.completion
+                if len(observe_window) >= 1: observe_window[0] += completion
                 # 看门狗，如果超过期限没有喂狗，则终止
                 if len(observe_window) >= 2:  
                     if (time.time()-observe_window[1]) > watch_dog_patience:
@@ -133,6 +135,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     history.append(inputs); history.append("")
 
+    resp_stream = None
     retry = 0
     while True:
         try:
@@ -141,9 +144,10 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
             # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             # with ProxyNetworkActivate()
-            stream = anthropic.completions.create(
-                prompt=prompt,
-                max_tokens_to_sample=4096,       # The maximum number of tokens to generate before stopping.
+            resp_stream = anthropic.messages.create(
+                system=system_prompt,
+                messages=prompt,
+                max_tokens=1024,       # The maximum number of tokens to generate before stopping.
                 model=llm_kwargs['llm_model'],
                 stream=True,
                 temperature = llm_kwargs['temperature']
@@ -159,9 +163,22 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     gpt_replying_buffer = ""
     
-    for completion in stream:
+    # for completion in stream:
+    #     try:
+    #         gpt_replying_buffer = gpt_replying_buffer + completion.completion
+    #         history[-1] = gpt_replying_buffer
+    #         chatbot[-1] = (history[-2], history[-1])
+    #         yield from update_ui(chatbot=chatbot, history=history, msg='正常') # 刷新界面
+
+    #     except Exception as e:
+    #         from toolbox import regular_txt_to_markdown
+    #         tb_str = '```\n' + trimmed_format_exc() + '```'
+    #         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str}")
+    #         yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + tb_str) # 刷新界面
+    #         return
+    for text in resp_stream.text_stream:
         try:
-            gpt_replying_buffer = gpt_replying_buffer + completion.completion
+            gpt_replying_buffer = gpt_replying_buffer + text
             history[-1] = gpt_replying_buffer
             chatbot[-1] = (history[-2], history[-1])
             yield from update_ui(chatbot=chatbot, history=history, msg='正常') # 刷新界面
@@ -200,7 +217,8 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
     conversation_cnt = len(history) // 2
 
-    messages = [{"role": "system", "content": system_prompt}]
+    # messages = [{"role": "system", "content": system_prompt}]
+    messages = []
     if conversation_cnt:
         for index in range(0, 2*conversation_cnt, 2):
             what_i_have_asked = {}
@@ -223,6 +241,6 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     messages.append(what_i_ask_now)
     prompt = convert_messages_to_prompt(messages)
 
-    return prompt
+    return messages
 
 

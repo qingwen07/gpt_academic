@@ -313,7 +313,7 @@ for model in AVAIL_LLM_MODELS:
         model_info.update({model: mi})
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
-if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS or "claude-3" in AVAIL_LLM_MODELS:
+if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS or "claude-3-opus-20240229" in AVAIL_LLM_MODELS:
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
     from .bridge_claude import predict as claude_ui
     model_info.update({
