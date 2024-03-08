@@ -280,7 +280,7 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    "gemini-pro": {
+    "gemini-1.0-pro": {
         "fn_with_ui": genai_ui,
         "fn_without_ui": genai_noui,
         "endpoint": None,
@@ -288,7 +288,7 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    "gemini-pro-vision": {
+    "gemini-1.0-pro-vision": {
         "fn_with_ui": genai_ui,
         "fn_without_ui": genai_noui,
         "endpoint": None,
