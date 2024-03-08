@@ -117,7 +117,7 @@ def get_core_functions():
         "英译中": {
             "Prefix":   r"翻译成地道的中文：" + "\n\n",
             "Suffix":   r"",
-            "Visible":  False,
+            "Visible":  True,
         },
         
         
@@ -125,7 +125,7 @@ def get_core_functions():
             "Prefix":   r"我需要你找一张网络图片。使用Unsplash API(https://source.unsplash.com/960x640/?<英语关键词>)获取图片URL，"
                         r"然后请使用Markdown格式封装，并且不要有反斜线，不要用代码块。现在，请按以下描述给我发送图片：" + "\n\n",
             "Suffix":   r"",
-            "Visible":  False,
+            "Visible":  True,
         },
         
         
