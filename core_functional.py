@@ -9,6 +9,20 @@ from textwrap import dedent
 
 def get_core_functions():
     return {
+        "编程助手": {
+            "Prefix":   r"你是经验丰富的编程专家，全栈程序员，请给下面的问题给出你专业的回答：" + "\n\n",
+            "Suffix":   r"",
+        },
+
+        "运维助手": {
+            "Prefix":   r"你是经验丰富的IT运维专家，尤其精通各种服务器系统，类unix系统和各种windows server，请给下面的问题给出你专业的回答：" + "\n\n",
+            "Suffix":   r"",
+        },
+
+        "DBA助手": {
+            "Prefix":   r"你是经验丰富的DBA专家，请给下面的问题给出你专业的回答：" + "\n\n",
+            "Suffix":   r"",
+        },
 
         "学术语料润色": {
             # [1*] 前缀字符串，会被加在你的输入之前。例如，用来描述你的要求，例如翻译、解释代码、润色等等。
@@ -125,7 +139,7 @@ def get_core_functions():
             "Prefix":   r"我需要你找一张网络图片。使用Unsplash API(https://source.unsplash.com/960x640/?<英语关键词>)获取图片URL，"
                         r"然后请使用Markdown格式封装，并且不要有反斜线，不要用代码块。现在，请按以下描述给我发送图片：" + "\n\n",
             "Suffix":   r"",
-            "Visible":  True,
+            "Visible":  False,
         },
         
         
