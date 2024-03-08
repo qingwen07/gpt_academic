@@ -79,7 +79,7 @@ def main():
     cancel_handles = []
     customize_btns = {}
     predefined_btns = {}
-    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
+    with gr.Blocks(title="GPT IT & 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
 
         # 创建一个函数，用于更新HTML文本
