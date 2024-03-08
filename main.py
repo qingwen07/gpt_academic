@@ -446,7 +446,7 @@ def main():
         favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"),
         # auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
         auth=my_auth,
-        auth_message=f"如没有账号，请到 http://mall.gpt-hub.top 注册",
+        auth_message=f"如没有账号，请到 https://mall.gpt-hub.top 注册",
         blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
     # 如果需要在二级路径下运行
