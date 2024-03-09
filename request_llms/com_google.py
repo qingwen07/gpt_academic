@@ -121,6 +121,17 @@ class GoogleChatInit:
         headers, payload = self.generate_message_payload(
             inputs, llm_kwargs, history, system_prompt
         )
+
+        from check_proxy import dec_suanzi_count
+        from .bridge_all import model_info
+
+        # todo: 这里可以加入计算请求的Tokens的代码
+        fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
+        req_token_cnt = fn_token_cnt(json.dumps(payload))
+        print(f"[predict_no_ui_long_connection]消耗请求tokens: {req_token_cnt}")
+        # 减少AI算子数量
+        dec_suanzi_count(llm_kwargs['llm_model'], req_token_cnt)
+
         response = requests.post(
             url=self.url_gemini,
             headers=headers,

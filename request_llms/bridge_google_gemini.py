@@ -8,6 +8,8 @@ import os
 import time
 from request_llms.com_google import GoogleChatInit
 from toolbox import get_conf, update_ui, update_ui_lastest_msg, have_any_recent_upload_image_files, trimmed_format_exc
+from check_proxy import dec_suanzi_count
+from .bridge_all import model_info
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
@@ -41,6 +43,15 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 if (time.time() - observe_window[1]) > watch_dog_patience: raise RuntimeError("程序终止。")
         if error_match:
             raise RuntimeError(f'{gpt_replying_buffer} 对话错误')
+        
+    # todo: 这里可以增加计算response的Tokens数量的代码，这里是所有的响应
+    if len(gpt_replying_buffer) > 0:
+        fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
+        resp_token_cnt = fn_token_cnt(gpt_replying_buffer)
+        print(f"返回消耗tokens: {resp_token_cnt}")
+        # 减少AI算子数量
+        dec_suanzi_count(llm_kwargs['llm_model'], resp_token_cnt)
+
     return gpt_replying_buffer
 
 
@@ -108,6 +119,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = (inputs, gpt_replying_buffer + f"触发了Google的安全访问策略，没有回答\n\n```\n{gpt_security_policy}\n```")
         yield from update_ui(chatbot=chatbot, history=history)
 
+    # todo: 这里可以增加计算response的Tokens数量的代码，这里是所有的响应
+    if len(gpt_replying_buffer) > 0:
+        fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
+        resp_token_cnt = fn_token_cnt(gpt_replying_buffer)
+        print(f"返回消耗tokens: {resp_token_cnt}")
+        # 减少AI算子数量
+        dec_suanzi_count(llm_kwargs['llm_model'], resp_token_cnt)
 
 
 if __name__ == '__main__':
