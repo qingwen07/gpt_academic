@@ -8,8 +8,6 @@ import os
 import time
 from request_llms.com_google import GoogleChatInit
 from toolbox import get_conf, update_ui, update_ui_lastest_msg, have_any_recent_upload_image_files, trimmed_format_exc
-from check_proxy import dec_suanzi_count
-from .bridge_all import model_info
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
@@ -46,6 +44,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         
     # todo: 这里可以增加计算response的Tokens数量的代码，这里是所有的响应
     if len(gpt_replying_buffer) > 0:
+        from check_proxy import dec_suanzi_count
+        from .bridge_all import model_info
         fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
         resp_token_cnt = fn_token_cnt(gpt_replying_buffer)
         print(f"返回消耗tokens: {resp_token_cnt}")
@@ -121,6 +121,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     # todo: 这里可以增加计算response的Tokens数量的代码，这里是所有的响应
     if len(gpt_replying_buffer) > 0:
+        from check_proxy import dec_suanzi_count
+        from .bridge_all import model_info
         fn_token_cnt = model_info[llm_kwargs['llm_model']]['token_cnt']
         resp_token_cnt = fn_token_cnt(gpt_replying_buffer)
         print(f"返回消耗tokens: {resp_token_cnt}")
