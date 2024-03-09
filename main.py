@@ -453,9 +453,10 @@ def main():
     # CUSTOM_PATH = get_conf('CUSTOM_PATH')
     # if CUSTOM_PATH != "/":
     #     from toolbox import run_gradio_in_subpath
-    #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
+    #     run_gradio_in_subpath(demo.queue(concurrency_count=CONCURRENT_COUNT), auth=my_auth, port=PORT, custom_path=CUSTOM_PATH)
     # else:
-    #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
+    #     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+    #         server_name="0.0.0.0", server_port=PORT, auth=my_auth, favicon_path="docs/logo.png",
     #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
 if __name__ == "__main__":

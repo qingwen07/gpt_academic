@@ -716,8 +716,11 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
     import threading, time, copy
 
     # 判断用户是否还在有效期
-    if not get_user_isvalid():
-        raise AssertionError("账号服务期已过或算子为零，请前往 http://mall.gpt-hub.top 查看！")
+    user_valid = get_user_isvalid()
+    if user_valid == 2:
+        raise AssertionError("账号服务期已过或算子为零，请前往 https://mall.gpt-hub.top 查看！")
+    elif user_valid == 3:
+        raise AssertionError("账号在其他地方登陆过，请访问 https://pro.gpt-hub.top/logout 重新登录！")
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
     model = llm_kwargs['llm_model']
@@ -793,9 +796,17 @@ def predict(inputs, llm_kwargs, *args, **kwargs):
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
 
-    if not get_user_isvalid():
-        yield from update_ui(chatbot=args[1], history=[], msg="账号服务期已过或算子为零，请前往 http://mall.gpt-hub.top 查看！") # 刷新界面
+    user_valid = get_user_isvalid()
+    if user_valid == 2:
+        yield from update_ui(chatbot=args[1], history=[], msg="账号服务期已过或算子为零，请前往 https://mall.gpt-hub.top 查看！") # 刷新界面
         return
+    elif user_valid == 3:
+        yield from update_ui(chatbot=args[1], history=[], msg="账号在其他地方登陆过，请访问 https://pro.gpt-hub.top/logout 重新登录！") # 刷新界面
+        return
+    
+    # if not get_user_isvalid():
+    #     yield from update_ui(chatbot=args[1], history=[], msg="账号服务期已过或算子为零，请前往 http://mall.gpt-hub.top 查看！") # 刷新界面
+    #     return
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
     method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项

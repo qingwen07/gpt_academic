@@ -654,7 +654,8 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
         raise RuntimeError("Ilegal custom path")
     import uvicorn
     import gradio as gr
-    from fastapi import FastAPI
+    from fastapi import FastAPI, Request, status
+    from fastapi.responses import RedirectResponse
 
     app = FastAPI()
     if custom_path != "/":
@@ -662,6 +663,16 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
         @app.get("/")
         def read_main():
             return {"message": f"Gradio is running at: {custom_path}"}
+        
+    @app.get("/logout")
+    def logout(request: Request):
+        response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+        cookies = request.cookies
+        for cookie in cookies:
+            if cookie.startswith('access-token'):
+                response.delete_cookie(cookie)
+        print("Logout user!")
+        return response
 
     app = gr.mount_gradio_app(app, demo, path=custom_path)
     uvicorn.run(app, host="0.0.0.0", port=port)  # , auth=auth
